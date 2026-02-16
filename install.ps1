@@ -45,3 +45,6 @@ Write-Host ""
 if ($LASTEXITCODE -eq 0) {
     Remove-Item rename-module.bat, rename-module.sh -ErrorAction SilentlyContinue
 }
+
+git add .
+git commit -m "initial commit"

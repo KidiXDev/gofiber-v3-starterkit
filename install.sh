@@ -59,3 +59,6 @@ chmod +x rename-module.sh
 if [ $? -eq 0 ]; then
     rm -f rename-module.sh rename-module.bat
 fi
+
+git add .
+git commit -m "initial commit"

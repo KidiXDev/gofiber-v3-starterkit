@@ -84,6 +84,8 @@ If you prefer to clone manually:
    cd my-app
    rm -rf .git  # Optional: Start with fresh git history
    git init
+   git add .
+   git commit -m "initial commit"
    ```
 
 2. **Rename the Module:**
