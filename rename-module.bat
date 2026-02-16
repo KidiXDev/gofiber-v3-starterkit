@@ -11,7 +11,7 @@ set "OLD_MODULE=gofiber-starterkit"
 
 :: Check if module name is provided as argument
 if "%~1"=="" (
-    echo Please enter your new module name (e.g., github.com/username/project):
+    echo Please enter your new module name ^(e.g., github.com/username/project^):
     set /p NEW_MODULE="> "
 ) else (
     set "NEW_MODULE=%~1"
