@@ -168,6 +168,18 @@ go run migrations/migrate.go --seed
 go run .
 ```
 
+**Development (with Hot Reload):**
+
+1. Install [Air](https://github.com/cosmtrek/air):
+```bash
+go install github.com/cosmtrek/air@latest
+```
+
+2. Run with Air:
+```bash
+air
+```
+
 **Build & Run:**
 ```bash
 go build -o app .
