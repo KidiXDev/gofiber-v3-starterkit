@@ -32,7 +32,25 @@ if [ -z "$NEW_MODULE" ]; then
     exit 1
 fi
 
-OLD_MODULE="gofiber-starterkit"
+
+OS="$(uname)"
+if [ "$OS" = "Darwin" ]; then
+    SED_CMD="sed -i ''"
+else
+    SED_CMD="sed -i"
+fi
+
+if [ -f "go.mod" ]; then
+    OLD_MODULE=$(grep "^module" go.mod | awk '{print $2}')
+else
+    echo -e "${RED}Error: go.mod not found. Cannot determine old module name.${RESET}"
+    exit 1
+fi
+
+if [ -z "$OLD_MODULE" ]; then
+    echo -e "${RED}Error: Could not determine module name from go.mod.${RESET}"
+    exit 1
+fi
 
 echo ""
 echo -e "You are about to rename the module from:"
@@ -49,15 +67,27 @@ fi
 echo ""
 echo -e "${BLUE}Renaming module...${RESET}"
 
-# Find and replace in all .go files
-find . -type f -name "*.go" -exec sed -i "s|$OLD_MODULE|$NEW_MODULE|g" {} +
+run_sed() {
+    local pattern="$1"
+    local file="$2"
+    if [ "$OS" = "Darwin" ]; then
+        sed -i '' "$pattern" "$file"
+    else
+        sed -i "$pattern" "$file"
+    fi
+}
 
-# Replace in go.mod
-sed -i "s|module $OLD_MODULE|module $NEW_MODULE|g" go.mod
+find . -type f \( -name "*.go" -o -name "go.mod" -o -name "*.md" -o -name "*.sh" -o -name "*.bat" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" \) -not -path "*/.*" -print0 | while IFS= read -r -d '' file; do
+    if [[ "$file" == "./rename-module.sh" ]]; then
+        continue
+    fi
+    run_sed "s|$OLD_MODULE|$NEW_MODULE|g" "$file"
+done
 
-# Update the scripts themselves to prevent re-running with old name issues if they persist
-sed -i "s|OLD_MODULE=\"$OLD_MODULE\"|OLD_MODULE=\"$NEW_MODULE\"|g" rename-module.sh
-sed -i "s|set \"OLD_MODULE=$OLD_MODULE\"|set \"OLD_MODULE=$NEW_MODULE\"|g" rename-module.bat 2>/dev/null || true
+run_sed "s|OLD_MODULE=\"$OLD_MODULE\"|OLD_MODULE=\"$NEW_MODULE\"|g" rename-module.sh
+if [ -f "rename-module.bat" ]; then
+    run_sed "s|$OLD_MODULE|$NEW_MODULE|g" rename-module.bat
+fi
 
 echo -e "${GREEN}✔ Module renamed successfully!${RESET}"
 echo ""

@@ -7,7 +7,6 @@ echo   GoFiber V3 Starter Pack Wizard
 echo ========================================================
 echo.
 
-set "OLD_MODULE=gofiber-starterkit"
 
 :: Check if module name is provided as argument
 if "%~1"=="" (
@@ -19,6 +18,18 @@ if "%~1"=="" (
 
 if "%NEW_MODULE%"=="" (
     echo Error: Module name cannot be empty.
+    goto :End
+)
+
+if not exist go.mod (
+    echo Error: go.mod not found.
+    goto :End
+)
+
+for /f "tokens=2" %%i in ('findstr /B "module" go.mod') do set OLD_MODULE=%%i
+
+if "%OLD_MODULE%"=="" (
+    echo Error: Could not determine module name from go.mod.
     goto :End
 )
 
@@ -35,14 +46,10 @@ if /i not "!CONFIRM!"=="y" (
 echo.
 echo Renaming module...
 
-for /r %%f in (*.go) do (
-    powershell -Command "(Get-Content '%%f') -replace '%OLD_MODULE%', '%NEW_MODULE%' | Set-Content '%%f'"
-)
+powershell -Command "$old = '%OLD_MODULE%'; $new = '%NEW_MODULE%'; $utf8 = New-Object System.Text.UTF8Encoding $False; Get-ChildItem -Recurse -Include *.go,*.mod,*.md,*.yaml,*.yml,*.json -Exclude .git | ForEach-Object { $c = [System.IO.File]::ReadAllText($_.FullName, $utf8); if ($c -match $old) { $c = $c -replace $old, $new; [System.IO.File]::WriteAllText($_.FullName, $c, $utf8); Write-Host 'Updated ' $_.FullName } }"
 
-powershell -Command "(Get-Content 'go.mod') -replace 'module %OLD_MODULE%', 'module %NEW_MODULE%' | Set-Content 'go.mod'"
+powershell -Command "$old = '%OLD_MODULE%'; $new = '%NEW_MODULE%'; $utf8 = New-Object System.Text.UTF8Encoding $False; $c = [System.IO.File]::ReadAllText('rename-module.sh', $utf8); $c = $c -replace 'OLD_MODULE=\"' + $old + '\"', 'OLD_MODULE=\"' + $new + '\"'; [System.IO.File]::WriteAllText('rename-module.sh', $c, $utf8)"
 
-powershell -Command "(Get-Content 'rename-module.sh') -replace 'OLD_MODULE=\"%OLD_MODULE%\"', 'OLD_MODULE=\"%NEW_MODULE%\"' | Set-Content 'rename-module.sh'"
-powershell -Command "(Get-Content 'rename-module.bat') -replace 'OLD_MODULE=%OLD_MODULE%', 'OLD_MODULE=%NEW_MODULE%' | Set-Content 'rename-module.bat'"
 
 echo.
 echo Module renamed successfully!
