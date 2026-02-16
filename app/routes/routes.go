@@ -2,22 +2,17 @@ package routes
 
 import (
 	"gofiber-starterkit/app/api/controllers"
-	"gofiber-starterkit/app/api/services"
-	"gofiber-starterkit/pkg/client/redis"
-	"gofiber-starterkit/pkg/client/s3"
 	"gofiber-starterkit/pkg/middlewares"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/uptrace/bun"
 )
 
-func RegisterRoutes(app *fiber.App, db *bun.DB, redisClient *redis.RedisClient, s3Client *s3.S3Client) {
+func RegisterRoutes(
+	app *fiber.App,
+	userController *controllers.UserController,
+	authMiddleware *middlewares.AuthMiddleware,
+) {
 	const ApiVersion = "/api/v1"
-
-	userService := services.NewUserService(db, redisClient, s3Client)
-	authMiddleware := middlewares.NewAuthMiddleware(userService, redisClient)
-
-	userController := controllers.NewUserController(userService)
 
 	api := app.Group(ApiVersion)
 

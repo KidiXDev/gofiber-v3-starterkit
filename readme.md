@@ -52,26 +52,58 @@ A production-ready Go Fiber v3 boilerplate with PostgreSQL, Redis, S3/MinIO, JWT
 
 ## Quick Start
 
-### 1. Rename Module
+### ⚡ One-Line Installation
 
-First, rename the module to your own project name:
-
-**Linux/macOS:**
-```bash
-chmod +x rename-module.sh
-./rename-module.sh github.com/yourusername/your-project
-```
-
-**Windows:**
-```batch
-rename-module.bat github.com/yourusername/your-project
-```
-
-### 2. Setup Environment
+**Linux / macOS:**
 
 ```bash
-cp .env.example .env
+/bin/bash <(curl -fsSL https://raw.githubusercontent.com/KidiXDev/gofiber-v3-starterkit/main/install.sh)
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/KidiXDev/gofiber-v3-starterkit/main/install.ps1'))
+```
+
+This will:
+1. Clone the repository
+2. Ask for your project name
+3. **Automatically rename the module** to your desired path
+4. Prepare the environment
+
+---
+
+### Manual Setup
+
+If you prefer to clone manually:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/KidiXDev/gofiber-v3-starterkit.git my-app
+   cd my-app
+   rm -rf .git  # Optional: Start with fresh git history
+   git init
+   ```
+
+2. **Rename the Module:**
+   
+   **Linux/macOS:**
+   ```bash
+   chmod +x rename-module.sh
+   ./rename-module.sh github.com/yourusername/your-project
+   ```
+   
+   **Windows:**
+   ```batch
+   rename-module.bat github.com/yourusername/your-project
+   ```
+
+3. **Setup Environment:**
+
+   ```bash
+   cp .env.example .env
+   ```
 
 Edit `.env` with your configuration:
 
@@ -101,13 +133,13 @@ MINIO_SECURE=false
 JWT_SECRET=your-super-secret-key-change-this
 ```
 
-### 3. Install Dependencies
+### 4. Install Dependencies
 
 ```bash
 go mod tidy
 ```
 
-### 4. Run Database Migrations
+### 5. Run Database Migrations
 
 **Option A: Using Atlas CLI (Recommended)**
 ```bash
@@ -129,7 +161,7 @@ go run migrations/migrate.go --seed
 ```
 
 
-### 5. Run the Application
+### 6. Run the Application
 
 **Development:**
 ```bash

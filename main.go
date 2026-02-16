@@ -1,6 +1,8 @@
 package main
 
 import (
+	"gofiber-starterkit/app/api/controllers"
+	"gofiber-starterkit/app/api/services"
 	"gofiber-starterkit/app/routes"
 	"gofiber-starterkit/app/shared"
 	"gofiber-starterkit/pkg/client/db"
@@ -21,29 +23,46 @@ import (
 func main() {
 	c := dig.New()
 
+	// Provide infrastructure
 	c.Provide(db.New)
 	c.Provide(redis.New)
 	c.Provide(s3.New)
 
-	c.Provide(func(dbClient *bun.DB, redisClient *redis.RedisClient, s3Client *s3.S3Client) *fiber.App {
+	// Provide application layers
+	c.Provide(services.NewUserService)
+	c.Provide(controllers.NewUserController)
+	c.Provide(middlewares.NewAuthMiddleware)
+
+	c.Provide(func() *fiber.App {
 		cfg := config.FiberConfig()
 		cfg.ErrorHandler = shared.RespondError
 
 		app := fiber.New(cfg)
+
+		// Global Middlewares
 		app.Use(compress.New(compress.Config{
 			Level: compress.LevelBestSpeed,
 		}))
-
 		middlewares.FiberMiddleware(app)
 
+		// Health Check
 		app.Get(healthcheck.LivenessEndpoint, healthcheck.New())
-
-		routes.RegisterRoutes(app, dbClient, redisClient, s3Client)
 
 		return app
 	})
 
-	c.Invoke(func(app *fiber.App, dbClient *bun.DB, redisClient *redis.RedisClient, s3Client *s3.S3Client) {
+	// Start Application
+	c.Invoke(func(
+		app *fiber.App,
+		userController *controllers.UserController,
+		authMiddleware *middlewares.AuthMiddleware,
+		dbClient *bun.DB,
+		redisClient *redis.RedisClient,
+	) {
+		// Register Routes
+		routes.RegisterRoutes(app, userController, authMiddleware)
+
+		// Lifecycle management
 		defer dbClient.Close()
 		defer redisClient.Client.Close()
 
